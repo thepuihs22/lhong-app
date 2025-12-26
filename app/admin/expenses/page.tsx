@@ -88,7 +88,7 @@ export default function AdminExpensesPage() {
       setPurchases(purchasesResponse.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error('Failed to load data');
+      toast.error('โหลดข้อมูลไม่สำเร็จ');
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,7 @@ export default function AdminExpensesPage() {
 
       if (error) throw error;
 
-      toast.success('Expense added successfully!');
+      toast.success('เพิ่มค่าใช้จ่ายสำเร็จ!');
       setShowExpenseForm(false);
       setNewExpense({
         title: '',
@@ -124,7 +124,7 @@ export default function AdminExpensesPage() {
       });
       fetchData();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to add expense');
+      toast.error(error.message || 'เพิ่มค่าใช้จ่ายไม่สำเร็จ');
     }
   };
 
@@ -153,7 +153,7 @@ export default function AdminExpensesPage() {
 
       if (error) throw error;
 
-      toast.success('Purchase added successfully!');
+      toast.success('เพิ่มการซื้อสำเร็จ!');
       setShowPurchaseForm(false);
       setNewPurchase({
         supplier_name: '',
@@ -164,12 +164,12 @@ export default function AdminExpensesPage() {
       });
       fetchData();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to add purchase');
+      toast.error(error.message || 'เพิ่มการซื้อไม่สำเร็จ');
     }
   };
 
   const deleteExpense = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this expense?')) return;
+    if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบค่าใช้จ่ายนี้?')) return;
 
     try {
       const { error } = await supabase
@@ -179,15 +179,15 @@ export default function AdminExpensesPage() {
 
       if (error) throw error;
 
-      toast.success('Expense deleted successfully!');
+      toast.success('ลบค่าใช้จ่ายสำเร็จ!');
       fetchData();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete expense');
+      toast.error(error.message || 'ลบค่าใช้จ่ายไม่สำเร็จ');
     }
   };
 
   const deletePurchase = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this purchase?')) return;
+    if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบการซื้อนี้?')) return;
 
     try {
       const { error } = await supabase
@@ -197,10 +197,10 @@ export default function AdminExpensesPage() {
 
       if (error) throw error;
 
-      toast.success('Purchase deleted successfully!');
+      toast.success('ลบการซื้อสำเร็จ!');
       fetchData();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete purchase');
+      toast.error(error.message || 'ลบการซื้อไม่สำเร็จ');
     }
   };
 
@@ -211,8 +211,8 @@ export default function AdminExpensesPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-orange-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mx-auto mb-4"></div>
+          <p className="text-secondary">กำลังโหลด...</p>
         </div>
       </div>
     );
@@ -227,10 +227,10 @@ export default function AdminExpensesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <div className="text-2xl font-bold text-orange-600">🍽️</div>
+              <div className="text-2xl font-bold text-secondary">🍽️</div>
               <div className="ml-3">
-                <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-sm text-gray-600">Expenses & Purchases</p>
+                <h1 className="text-xl font-bold text-gray-900">แดชบอร์ดผู้ดูแลระบบ</h1>
+                <p className="text-sm text-gray-600">ค่าใช้จ่ายและการซื้อ</p>
               </div>
             </div>
             <div className="flex space-x-4">
@@ -238,13 +238,13 @@ export default function AdminExpensesPage() {
                 href="/admin/dashboard"
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Dashboard
+                แดชบอร์ด
               </Link>
               <button
                 onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
                 className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
               >
-                Logout
+                ออกจากระบบ
               </button>
             </div>
           </div>
@@ -263,7 +263,7 @@ export default function AdminExpensesPage() {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Expenses
+                      ค่าใช้จ่ายรวม
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
                       ${totalExpenses.toFixed(2)}
@@ -283,7 +283,7 @@ export default function AdminExpensesPage() {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Purchases
+                      การซื้อรวม
                     </dt>
                     <dd className="text-lg font-medium text-gray-900">
                       ${totalPurchases.toFixed(2)}
@@ -303,21 +303,21 @@ export default function AdminExpensesPage() {
                 onClick={() => setActiveTab('expenses')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'expenses'
-                    ? 'border-orange-500 text-orange-600'
+                    ? 'border-secondary text-secondary'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                Expenses
+                ค่าใช้จ่าย
               </button>
               <button
                 onClick={() => setActiveTab('purchases')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'purchases'
-                    ? 'border-orange-500 text-orange-600'
+                    ? 'border-secondary text-secondary'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                Purchases
+                การซื้อ
               </button>
             </nav>
           </div>
@@ -327,12 +327,12 @@ export default function AdminExpensesPage() {
             {activeTab === 'expenses' && (
               <div>
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Expenses</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">ค่าใช้จ่าย</h2>
                   <button
                     onClick={() => setShowExpenseForm(true)}
-                    className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                    className="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary-600 transition-colors"
                   >
-                    Add Expense
+                    เพิ่มค่าใช้จ่าย
                   </button>
                 </div>
 
@@ -341,13 +341,13 @@ export default function AdminExpensesPage() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Title
+                          หัวข้อ
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Category
+                          หมวดหมู่
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Amount
+                          จำนวนเงิน
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Date
@@ -399,12 +399,12 @@ export default function AdminExpensesPage() {
             {activeTab === 'purchases' && (
               <div>
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Purchases</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">การซื้อ</h2>
                   <button
                     onClick={() => setShowPurchaseForm(true)}
-                    className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                    className="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary-600 transition-colors"
                   >
-                    Add Purchase
+                    เพิ่มการซื้อ
                   </button>
                 </div>
 
@@ -413,16 +413,16 @@ export default function AdminExpensesPage() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Supplier
+                          ซัพพลายเออร์
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Item
+                          รายการ
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Quantity
+                          จำนวน
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Unit Price
+                          ราคาต่อหน่วย
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Total
@@ -481,7 +481,7 @@ export default function AdminExpensesPage() {
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Add New Expense</h3>
+                <h3 className="text-lg font-medium text-gray-900">เพิ่มค่าใช้จ่ายใหม่</h3>
                 <button
                   onClick={() => setShowExpenseForm(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -492,51 +492,51 @@ export default function AdminExpensesPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Title *</label>
+                  <label className="block text-sm font-medium text-gray-700">หัวข้อ *</label>
                   <input
                     type="text"
                     value={newExpense.title}
                     onChange={(e) => setNewExpense({...newExpense, title: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
+                  <label className="block text-sm font-medium text-gray-700">คำอธิบาย</label>
                   <textarea
                     value={newExpense.description}
                     onChange={(e) => setNewExpense({...newExpense, description: e.target.value})}
                     rows={3}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Amount *</label>
+                    <label className="block text-sm font-medium text-gray-700">จำนวนเงิน *</label>
                     <input
                       type="number"
                       step="0.01"
                       value={newExpense.amount}
                       onChange={(e) => setNewExpense({...newExpense, amount: e.target.value})}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Category *</label>
+                    <label className="block text-sm font-medium text-gray-700">หมวดหมู่ *</label>
                     <select
                       value={newExpense.category}
                       onChange={(e) => setNewExpense({...newExpense, category: e.target.value})}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
                     >
-                      <option value="">Select category</option>
-                      <option value="Utilities">Utilities</option>
-                      <option value="Rent">Rent</option>
-                      <option value="Equipment">Equipment</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="Maintenance">Maintenance</option>
-                      <option value="Other">Other</option>
+                      <option value="">เลือกหมวดหมู่</option>
+                      <option value="Utilities">สาธารณูปโภค</option>
+                      <option value="Rent">ค่าเช่า</option>
+                      <option value="Equipment">อุปกรณ์</option>
+                      <option value="Marketing">การตลาด</option>
+                      <option value="Maintenance">การบำรุงรักษา</option>
+                      <option value="Other">อื่นๆ</option>
                     </select>
                   </div>
                 </div>
@@ -547,7 +547,7 @@ export default function AdminExpensesPage() {
                     type="date"
                     value={newExpense.expense_date}
                     onChange={(e) => setNewExpense({...newExpense, expense_date: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
                   />
                 </div>
 
@@ -556,13 +556,13 @@ export default function AdminExpensesPage() {
                     onClick={() => setShowExpenseForm(false)}
                     className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
-                    Cancel
+                    ยกเลิก
                   </button>
                   <button
                     onClick={handleCreateExpense}
                     className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
                   >
-                    Add Expense
+                    เพิ่มค่าใช้จ่าย
                   </button>
                 </div>
               </div>
@@ -577,7 +577,7 @@ export default function AdminExpensesPage() {
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Add New Purchase</h3>
+                <h3 className="text-lg font-medium text-gray-900">เพิ่มการซื้อใหม่</h3>
                 <button
                   onClick={() => setShowPurchaseForm(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -589,55 +589,55 @@ export default function AdminExpensesPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Supplier Name *</label>
+                    <label className="block text-sm font-medium text-gray-700">ชื่อซัพพลายเออร์ *</label>
                     <input
                       type="text"
                       value={newPurchase.supplier_name}
                       onChange={(e) => setNewPurchase({...newPurchase, supplier_name: e.target.value})}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Item Name *</label>
+                    <label className="block text-sm font-medium text-gray-700">ชื่อรายการ *</label>
                     <input
                       type="text"
                       value={newPurchase.item_name}
                       onChange={(e) => setNewPurchase({...newPurchase, item_name: e.target.value})}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Quantity *</label>
+                    <label className="block text-sm font-medium text-gray-700">จำนวน *</label>
                     <input
                       type="number"
                       value={newPurchase.quantity}
                       onChange={(e) => setNewPurchase({...newPurchase, quantity: e.target.value})}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Unit Price *</label>
+                    <label className="block text-sm font-medium text-gray-700">ราคาต่อหน่วย *</label>
                     <input
                       type="number"
                       step="0.01"
                       value={newPurchase.unit_price}
                       onChange={(e) => setNewPurchase({...newPurchase, unit_price: e.target.value})}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Date</label>
+                    <label className="block text-sm font-medium text-gray-700">วันที่</label>
                     <input
                       type="date"
                       value={newPurchase.purchase_date}
                       onChange={(e) => setNewPurchase({...newPurchase, purchase_date: e.target.value})}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
                     />
                   </div>
                 </div>
@@ -647,13 +647,13 @@ export default function AdminExpensesPage() {
                     onClick={() => setShowPurchaseForm(false)}
                     className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
-                    Cancel
+                    ยกเลิก
                   </button>
                   <button
                     onClick={handleCreatePurchase}
                     className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
                   >
-                    Add Purchase
+                    เพิ่มการซื้อ
                   </button>
                 </div>
               </div>

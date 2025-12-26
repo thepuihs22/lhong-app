@@ -135,7 +135,7 @@ export default function StaffOrdersPage() {
       }
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error('Failed to load data');
+      toast.error('โหลดข้อมูลไม่สำเร็จ');
     } finally {
       setLoading(false);
     }
@@ -154,7 +154,7 @@ export default function StaffOrdersPage() {
 
   const handleCreateOrder = async () => {
     if (!newOrder.customer_name.trim()) {
-      toast.error('Customer name is required');
+      toast.error('กรุณากรอกชื่อลูกค้า');
       return;
     }
 
@@ -182,7 +182,7 @@ export default function StaffOrdersPage() {
       });
 
     if (selectedItemsList.length === 0) {
-      toast.error('Please select at least one item');
+      toast.error('กรุณาเลือกรายการอย่างน้อย 1 รายการ');
       return;
     }
 
@@ -251,7 +251,7 @@ export default function StaffOrdersPage() {
         if (toppingsError) throw toppingsError;
       }
 
-      toast.success('Order created successfully!');
+      toast.success('สร้างออเดอร์สำเร็จ!');
       setShowNewOrderForm(false);
       setNewOrder({
         customer_name: '',
@@ -263,7 +263,7 @@ export default function StaffOrdersPage() {
       setSelectedToppings({});
       fetchData();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create order');
+      toast.error(error.message || 'สร้างออเดอร์ไม่สำเร็จ');
     }
   };
 
@@ -276,10 +276,10 @@ export default function StaffOrdersPage() {
 
       if (error) throw error;
 
-      toast.success('Order status updated!');
+      toast.success('อัปเดตสถานะออเดอร์สำเร็จ!');
       fetchData();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update order');
+      toast.error(error.message || 'อัปเดตออเดอร์ไม่สำเร็จ');
     }
   };
 
@@ -295,13 +295,13 @@ export default function StaffOrdersPage() {
 
       if (error) throw error;
 
-      toast.success('Order cancelled successfully!');
+      toast.success('ยกเลิกออเดอร์สำเร็จ!');
       setShowCancelModal(false);
       setCancelReason('');
       setOrderToCancel(null);
       fetchData();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to cancel order');
+      toast.error(error.message || 'ยกเลิกออเดอร์ไม่สำเร็จ');
     }
   };
 
@@ -387,8 +387,8 @@ export default function StaffOrdersPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-orange-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mx-auto mb-4"></div>
+          <p className="text-secondary">กำลังโหลด...</p>
         </div>
       </div>
     );
@@ -403,24 +403,24 @@ export default function StaffOrdersPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <div className="text-2xl font-bold text-orange-600">🍽️</div>
+              <div className="text-2xl font-bold text-secondary">🍽️</div>
               <div className="ml-3">
-                <h1 className="text-xl font-bold text-gray-900">Staff Dashboard</h1>
-                <p className="text-sm text-gray-600">Order Management</p>
+                <h1 className="text-xl font-bold text-gray-900">แดชบอร์ดพนักงาน</h1>
+                <p className="text-sm text-gray-600">จัดการออเดอร์</p>
               </div>
             </div>
             <div className="flex space-x-4">
               <button
                 onClick={() => setShowNewOrderForm(true)}
-                className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                className="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary-600 transition-colors"
               >
-                New Order
+                ออเดอร์ใหม่
               </button>
               <button
                 onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
                 className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
               >
-                Logout
+                ออกจากระบบ
               </button>
             </div>
           </div>
@@ -434,30 +434,30 @@ export default function StaffOrdersPage() {
             {/* Search Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Customer
+                ค้นหาลูกค้า
               </label>
               <input
                 type="text"
-                placeholder="Name or phone number..."
+                placeholder="ชื่อหรือเบอร์โทรศัพท์..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
               />
             </div>
 
             {/* Order Type Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Order Type
+                ประเภทออเดอร์
               </label>
               <select
                 value={orderTypeFilter}
                 onChange={(e) => setOrderTypeFilter(e.target.value as 'all' | 'dine-in' | 'delivery')}
-                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
               >
-                <option value="all">All Types</option>
-                <option value="dine-in">Dine-in</option>
-                <option value="delivery">Delivery</option>
+                <option value="all">ทุกประเภท</option>
+                <option value="dine-in">ทานที่ร้าน</option>
+                <option value="delivery">ส่งอาหาร</option>
               </select>
             </div>
 
@@ -469,14 +469,14 @@ export default function StaffOrdersPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as 'all' | 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled')}
-                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
               >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="preparing">Preparing</option>
-                <option value="ready">Ready</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="all">ทุกสถานะ</option>
+                <option value="pending">รอดำเนินการ</option>
+                <option value="preparing">กำลังเตรียม</option>
+                <option value="ready">พร้อมเสิร์ฟ</option>
+                <option value="completed">เสร็จสิ้น</option>
+                <option value="cancelled">ยกเลิก</option>
               </select>
             </div>
 
@@ -486,17 +486,17 @@ export default function StaffOrdersPage() {
                 onClick={clearFilters}
                 className="w-full bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
               >
-                Clear Filters
+                ล้างตัวกรอง
               </button>
             </div>
           </div>
 
           {/* Results Count */}
           <div className="mt-4 text-sm text-gray-600">
-            Showing {filteredOrders.length} of {orders.length} orders
+            แสดง {filteredOrders.length} จาก {orders.length} ออเดอร์
             {(searchTerm || orderTypeFilter !== 'all' || statusFilter !== 'all') && (
-              <span className="ml-2 text-orange-600">
-                (filtered)
+              <span className="ml-2 text-secondary">
+                (กรองแล้ว)
               </span>
             )}
           </div>
@@ -505,29 +505,29 @@ export default function StaffOrdersPage() {
         {/* Orders List */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
+            <h2 className="text-lg font-semibold text-gray-900">ออเดอร์ล่าสุด</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Order #
+                    เลขที่ออเดอร์
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
+                    ลูกค้า
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
+                    ประเภท
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    สถานะ
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Total
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    การดำเนินการ
                   </th>
                 </tr>
               </thead>
@@ -556,12 +556,12 @@ export default function StaffOrdersPage() {
                           ? 'bg-blue-100 text-blue-800' 
                           : 'bg-green-100 text-green-800'
                       }`}>
-                        {order.order_type}
+                        {order.order_type === 'dine-in' ? 'ทานที่ร้าน' : 'ส่งอาหาร'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                        {order.status}
+                        {order.status === 'pending' ? 'รอดำเนินการ' : order.status === 'preparing' ? 'กำลังเตรียม' : order.status === 'ready' ? 'พร้อมเสิร์ฟ' : order.status === 'completed' ? 'เสร็จสิ้น' : 'ยกเลิก'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -575,7 +575,7 @@ export default function StaffOrdersPage() {
                             className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors"
                           >
                             <span className="mr-1">▶️</span>
-                            Start Cooking
+                            เริ่มทำอาหาร
                           </button>
                         )}
                         {order.status === 'preparing' && (
@@ -584,7 +584,7 @@ export default function StaffOrdersPage() {
                             className="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors"
                           >
                             <span className="mr-1">✅</span>
-                            Mark Ready
+                            ทำเสร็จแล้ว
                           </button>
                         )}
                         {order.status === 'ready' && (
@@ -593,7 +593,7 @@ export default function StaffOrdersPage() {
                             className="inline-flex items-center px-3 py-1.5 bg-gray-600 text-white text-xs font-medium rounded-md hover:bg-gray-700 transition-colors"
                           >
                             <span className="mr-1">🏁</span>
-                            Complete Order
+                            เสร็จสิ้นออเดอร์
                           </button>
                         )}
                         {order.status !== 'completed' && order.status !== 'cancelled' && (
@@ -602,7 +602,7 @@ export default function StaffOrdersPage() {
                             className="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-md hover:bg-red-700 transition-colors"
                           >
                             <span className="mr-1">❌</span>
-                            Cancel Order
+                            ยกเลิกออเดอร์
                           </button>
                         )}
                       </div>
@@ -616,14 +616,14 @@ export default function StaffOrdersPage() {
           {filteredOrders.length === 0 && (
             <div className="text-center py-12">
               <div className="text-gray-500 mb-2">
-                {orders.length === 0 ? 'No orders found' : 'No orders match your filters'}
+                {orders.length === 0 ? 'ไม่พบออเดอร์' : 'ไม่มีออเดอร์ที่ตรงกับตัวกรอง'}
               </div>
               {orders.length > 0 && (
                 <button
                   onClick={clearFilters}
-                  className="text-orange-600 hover:text-orange-700 text-sm"
+                  className="text-secondary hover:text-secondary-600 text-sm"
                 >
-                  Clear filters to see all orders
+                  ล้างตัวกรองเพื่อดูออเดอร์ทั้งหมด
                 </button>
               )}
             </div>
@@ -637,7 +637,7 @@ export default function StaffOrdersPage() {
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Create New Order</h3>
+                <h3 className="text-lg font-medium text-gray-900">สร้างออเดอร์ใหม่</h3>
                 <button
                   onClick={() => setShowNewOrderForm(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -649,7 +649,7 @@ export default function StaffOrdersPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Customer Name *</label>
+                    <label className="block text-sm font-medium text-gray-700">ชื่อลูกค้า *</label>
                     <input
                       type="text"
                       value={newOrder.customer_name}
@@ -658,7 +658,7 @@ export default function StaffOrdersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Phone</label>
+                    <label className="block text-sm font-medium text-gray-700">เบอร์โทรศัพท์</label>
                     <input
                       type="text"
                       value={newOrder.customer_phone}
@@ -669,19 +669,19 @@ export default function StaffOrdersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Order Type</label>
+                    <label className="block text-sm font-medium text-gray-700">ประเภทออเดอร์</label>
                   <select
                     value={newOrder.order_type}
                     onChange={(e) => setNewOrder({...newOrder, order_type: e.target.value as 'dine-in' | 'delivery'})}
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
                   >
-                    <option value="dine-in">Dine-in</option>
-                    <option value="delivery">Delivery</option>
+                    <option value="dine-in">ทานที่ร้าน</option>
+                    <option value="delivery">ส่งอาหาร</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Notes</label>
+                    <label className="block text-sm font-medium text-gray-700">หมายเหตุ</label>
                   <textarea
                     value={newOrder.notes}
                     onChange={(e) => setNewOrder({...newOrder, notes: e.target.value})}
@@ -691,7 +691,7 @@ export default function StaffOrdersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Menu Items</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">รายการอาหาร</label>
                   <div className="grid grid-cols-1 gap-4 max-h-60 overflow-y-auto">
                     {menuItems.map((item) => (
                       <div key={item.id} className="p-3 border rounded-lg">
@@ -701,8 +701,8 @@ export default function StaffOrdersPage() {
                             <div className="text-sm text-gray-500">
                               ${item.price.toFixed(2)}
                               {selectedItems[item.id] > 0 && (
-                                <span className="ml-2 text-orange-600 font-medium">
-                                  Total: ${calculateItemTotal(item, selectedItems[item.id] || 0).toFixed(2)}
+                                <span className="ml-2 text-secondary font-medium">
+                                  รวม: ${calculateItemTotal(item, selectedItems[item.id] || 0).toFixed(2)}
                                 </span>
                               )}
                             </div>
@@ -723,7 +723,7 @@ export default function StaffOrdersPage() {
                                 ...selectedItems,
                                 [item.id]: (selectedItems[item.id] || 0) + 1
                               })}
-                              className="w-8 h-8 rounded-full bg-orange-200 flex items-center justify-center hover:bg-orange-300"
+                              className="w-8 h-8 rounded-full bg-secondary-200 flex items-center justify-center hover:bg-secondary-300"
                             >
                               +
                             </button>
@@ -732,8 +732,8 @@ export default function StaffOrdersPage() {
                         
                         {/* Toppings for this item */}
                         {item.allow_toppings && selectedItems[item.id] > 0 && (
-                          <div className="mt-2 pl-4 border-l-2 border-orange-200">
-                            <div className="text-xs font-medium text-gray-700 mb-1">Toppings:</div>
+                          <div className="mt-2 pl-4 border-l-2 border-secondary-200">
+                            <div className="text-xs font-medium text-gray-700 mb-1">ท็อปปิ้ง:</div>
                             <div className="space-y-1">
                               {getAvailableToppings(item).map((topping) => (
                                 <div key={topping.id} className="flex items-center justify-between text-xs">
@@ -760,7 +760,7 @@ export default function StaffOrdersPage() {
                                           [topping.id]: (selectedToppings[item.id]?.[topping.id] || 0) + 1
                                         }
                                       })}
-                                      className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center hover:bg-orange-200"
+                                      className="w-6 h-6 rounded-full bg-secondary-100 flex items-center justify-center hover:bg-secondary-200"
                                     >
                                       +
                                     </button>
@@ -780,13 +780,13 @@ export default function StaffOrdersPage() {
                     onClick={() => setShowNewOrderForm(false)}
                     className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
-                    Cancel
+                    ยกเลิก
                   </button>
                   <button
                     onClick={handleCreateOrder}
-                    className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
+                    className="px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-600"
                   >
-                    Create Order
+                    สร้างออเดอร์
                   </button>
                 </div>
               </div>
@@ -802,7 +802,7 @@ export default function StaffOrdersPage() {
             <div className="mt-3">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Order Details - {selectedOrder.order_number}
+                  รายละเอียดออเดอร์ - {selectedOrder.order_number}
                 </h3>
                 <button
                   onClick={closeOrderDetails}
@@ -815,37 +815,37 @@ export default function StaffOrdersPage() {
               {/* Order Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <div className="text-sm font-medium text-gray-700">Customer</div>
+                  <div className="text-sm font-medium text-gray-700">ลูกค้า</div>
                   <div className="text-gray-900">{selectedOrder.customer_name}</div>
                   {selectedOrder.customer_phone && (
                     <div className="text-sm text-gray-600">{selectedOrder.customer_phone}</div>
                   )}
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-gray-700">Order Type</div>
+                  <div className="text-sm font-medium text-gray-700">ประเภทออเดอร์</div>
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                     selectedOrder.order_type === 'dine-in' 
                       ? 'bg-blue-100 text-blue-800' 
                       : 'bg-green-100 text-green-800'
                   }`}>
-                    {selectedOrder.order_type}
+                    {selectedOrder.order_type === 'dine-in' ? 'ทานที่ร้าน' : 'ส่งอาหาร'}
                   </span>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-gray-700">Status</div>
+                  <div className="text-sm font-medium text-gray-700">สถานะ</div>
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedOrder.status)}`}>
-                    {selectedOrder.status}
+                    {selectedOrder.status === 'pending' ? 'รอดำเนินการ' : selectedOrder.status === 'preparing' ? 'กำลังเตรียม' : selectedOrder.status === 'ready' ? 'พร้อมเสิร์ฟ' : selectedOrder.status === 'completed' ? 'เสร็จสิ้น' : 'ยกเลิก'}
                   </span>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-gray-700">Total Amount</div>
-                  <div className="text-lg font-bold text-orange-600">${selectedOrder.total_amount.toFixed(2)}</div>
+                  <div className="text-sm font-medium text-gray-700">ยอดรวม</div>
+                  <div className="text-lg font-bold text-secondary">${selectedOrder.total_amount.toFixed(2)}</div>
                 </div>
               </div>
 
               {/* Order Items */}
               <div className="mb-4">
-                <h4 className="text-md font-semibold text-gray-900 mb-3">Order Items</h4>
+                <h4 className="text-md font-semibold text-gray-900 mb-3">รายการอาหาร</h4>
                 <div className="space-y-3">
                   {selectedOrder.order_items?.map((item) => (
                     <div key={item.id} className="border rounded-lg p-4">
@@ -855,11 +855,11 @@ export default function StaffOrdersPage() {
                             {item.menu_item?.name} × {item.quantity}
                           </div>
                           <div className="text-sm text-gray-600">
-                            Base Price: ${item.unit_price.toFixed(2)} each
+                            ราคาพื้นฐาน: ${item.unit_price.toFixed(2)} ต่อชิ้น
                           </div>
                           {item.special_instructions && (
                             <div className="text-sm text-gray-500 mt-1">
-                              <span className="font-medium">Note:</span> {item.special_instructions}
+                              <span className="font-medium">หมายเหตุ:</span> {item.special_instructions}
                             </div>
                           )}
                         </div>
@@ -873,7 +873,7 @@ export default function StaffOrdersPage() {
                       {/* Toppings */}
                       {item.order_item_toppings && item.order_item_toppings.length > 0 ? (
                         <div className="mt-2 pl-4 border-l-2 border-orange-200">
-                          <div className="text-sm font-medium text-gray-700 mb-1">Toppings:</div>
+                          <div className="text-sm font-medium text-gray-700 mb-1">ท็อปปิ้ง:</div>
                           <div className="space-y-1">
                             {item.order_item_toppings.map((topping) => (
                               <div key={topping.id} className="flex justify-between items-center text-sm">
@@ -889,7 +889,7 @@ export default function StaffOrdersPage() {
                         </div>
                       ) : (
                         <div className="mt-2 pl-4 border-l-2 border-gray-200">
-                          <div className="text-sm text-gray-500">No toppings</div>
+                          <div className="text-sm text-gray-500">ไม่มีท็อปปิ้ง</div>
                         </div>
                       )}
                     </div>
@@ -900,7 +900,7 @@ export default function StaffOrdersPage() {
               {/* Order Notes */}
               {selectedOrder.notes && (
                 <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="text-sm font-medium text-gray-700 mb-1">Order Notes:</div>
+                  <div className="text-sm font-medium text-gray-700 mb-1">หมายเหตุออเดอร์:</div>
                   <div className="text-sm text-gray-600">{selectedOrder.notes}</div>
                 </div>
               )}
@@ -908,11 +908,11 @@ export default function StaffOrdersPage() {
               {/* Order Summary */}
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-lg font-semibold">
-                  <span>Total Order Amount:</span>
-                  <span className="text-orange-600">${selectedOrder.total_amount.toFixed(2)}</span>
+                  <span>ยอดรวมออเดอร์:</span>
+                  <span className="text-secondary">${selectedOrder.total_amount.toFixed(2)}</span>
                 </div>
                 <div className="text-sm text-gray-500 mt-1">
-                  Order placed: {new Date(selectedOrder.created_at).toLocaleString()}
+                  สั่งออเดอร์เมื่อ: {new Date(selectedOrder.created_at).toLocaleString()}
                 </div>
               </div>
 
@@ -921,7 +921,7 @@ export default function StaffOrdersPage() {
                   onClick={closeOrderDetails}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
-                  Close
+                  ปิด
                 </button>
               </div>
             </div>
@@ -935,7 +935,7 @@ export default function StaffOrdersPage() {
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Cancel Order</h3>
+                <h3 className="text-lg font-medium text-gray-900">ยกเลิกออเดอร์</h3>
                 <button
                   onClick={closeCancelModal}
                   className="text-gray-400 hover:text-gray-600"
@@ -946,22 +946,22 @@ export default function StaffOrdersPage() {
 
               <div className="mb-4">
                 <p className="text-sm text-gray-600 mb-2">
-                  Are you sure you want to cancel order <strong>{orderToCancel.order_number}</strong>?
+                  คุณแน่ใจหรือไม่ว่าต้องการยกเลิกออเดอร์ <strong>{orderToCancel.order_number}</strong>?
                 </p>
                 <p className="text-sm text-gray-600 mb-4">
-                  Customer: {orderToCancel.customer_name}
+                  ลูกค้า: {orderToCancel.customer_name}
                 </p>
               </div>
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Reason for cancellation *
+                  เหตุผลในการยกเลิก *
                 </label>
                 <textarea
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
                   rows={3}
-                  placeholder="Please provide a reason for cancelling this order..."
+                  placeholder="กรุณาระบุเหตุผลในการยกเลิกออเดอร์นี้..."
                   className="w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
                   required
                 />
@@ -972,14 +972,14 @@ export default function StaffOrdersPage() {
                   onClick={closeCancelModal}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
-                  Keep Order
+                  เก็บออเดอร์ไว้
                 </button>
                 <button
                   onClick={() => cancelOrderWithReason(orderToCancel.id, cancelReason)}
                   disabled={!cancelReason.trim()}
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  Cancel Order
+                  ยกเลิกออเดอร์
                 </button>
               </div>
             </div>

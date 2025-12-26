@@ -6,50 +6,44 @@ import { Toaster } from 'react-hot-toast';
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space-grotesk',
+  display: 'swap',
 });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: 'swap',
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
-  title: "Lhong Restaurant - Authentic Thai Cuisine",
-  description: "Experience the authentic flavors of Thailand at Lhong Restaurant. Fresh ingredients, traditional recipes, and exceptional service.",
-  keywords: "restaurant, Thai food, authentic cuisine, Bangkok, dining",
-  authors: [{ name: 'Lhong Restaurant' }],
-  creator: 'Lhong Restaurant',
-  publisher: 'Lhong Restaurant',
+  title: "Lhong Kung Share - หลงกุ้งแช่",
+  description: "เด็ดแน่ แซ่บแท้ สูตรแม่ล้วน กุ้งแช่น้ำปลาที่จริงใจพร้อมเสิร์ฟแล้ว😋",
+  keywords: "เด็ดแน่ แซ่บแท้ สูตรแม่ล้วน กุ้งแช่น้ำปลาที่จริงใจพร้อมเสิร์ฟแล้ว😋",
+  authors: [{ name: 'Lhong Kung Share' }],
+  creator: 'Lhong Kung Share',
+  publisher: 'Lhong Kung Share',
   robots: 'index, follow',
   openGraph: {
-    title: "Lhong Restaurant - Authentic Thai Cuisine",
-    description: 'Experience the authentic flavors of Thailand at Lhong Restaurant. Fresh ingredients, traditional recipes, and exceptional service.',
-    url: 'https://lhong-restaurant.com',
-    siteName: 'Lhong Restaurant',
-    images: [
-      {
-        url: '/images/restaurant-hero.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Lhong Restaurant - Authentic Thai Cuisine',
-        type: 'image/jpeg',
-      },
-    ],
+    title: "Lhong Kung Share - หลงกุ้งแช่",
+    description: 'เด็ดแน่ แซ่บแท้ สูตรแม่ล้วน กุ้งแช่น้ำปลาที่จริงใจพร้อมเสิร์ฟแล้ว😋',
+    url: 'https://lhong-kung-share.com',
+    siteName: 'Lhong Kung Share',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Lhong Restaurant - Authentic Thai Cuisine",
-    description: 'Experience the authentic flavors of Thailand at Lhong Restaurant. Fresh ingredients, traditional recipes, and exceptional service.',
-    images: ['/images/restaurant-hero.jpg'],
-    creator: '@lhongrestaurant',
+    title: "Lhong Kung Share - หลงกุ้งแช่",
+    description: 'เด็ดแน่ แซ่บแท้ สูตรแม่ล้วน กุ้งแช่น้ำปลาที่จริงใจพร้อมเสิร์ฟแล้ว😋',
+    images: ['/images/lhong-kung-share.jpg'],
+    creator: '@lhongkungshare',
   },
   alternates: {
     canonical: 'https://lhong-restaurant.com',
