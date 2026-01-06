@@ -118,7 +118,15 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <div className="text-4xl font-bold text-primary-700"></div>
+              <div className="relative w-16 h-16 mr-4">
+                <Image 
+                  src="/img/logo.jpg" 
+                  alt="Lhong Kung Share Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
               <div className="ml-4">
                 <h1 className="text-3xl font-bold text-primary">
                 Lhong Kung Share - หลงกุ้งแช่
@@ -234,9 +242,13 @@ export default function Home() {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="w-full h-full bg-primary-100 flex items-center justify-center">
-                      <div className="text-9xl text-primary-600 group-hover:scale-110 transition-transform duration-500">🦐</div>
-                    </div>
+                    <Image 
+                      src="/img/menu_shimp.png" 
+                      alt={item.name}
+                      width={400}
+                      height={256}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
                   )}
                   
                   {/* Trendy overlay */}
@@ -325,11 +337,19 @@ export default function Home() {
             <div className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-700 transform hover:scale-105 border border-primary-100/60">
               <div className="text-7xl mb-6 group-hover:scale-110 transition-transform duration-500">📍</div>
               <h4 className="text-2xl font-bold text-stone-800 mb-4">Location</h4>
-              <p className="text-stone-600 leading-relaxed">
+              <p className="text-stone-600 leading-relaxed mb-4">
                 Kanlapaphruek Street<br />
                 Bangkok, Thailand 10110<br />
                 <span className="text-primary-700 font-bold">Near Kanlapaphruek Market</span>
               </p>
+              <a
+                href="https://share.google/qzNzcYTGPCAR5OovZ"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-4 bg-secondary text-white px-6 py-3 rounded-full hover:bg-secondary-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
+              >
+                📍 Open in Google Maps
+              </a>
             </div>
             
             <div className="group bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-700 transform hover:scale-105 border border-secondary-100/60">
@@ -346,8 +366,8 @@ export default function Home() {
               <h4 className="text-2xl font-bold text-stone-800 mb-4">Hours</h4>
               <p className="text-stone-600 leading-relaxed">
                 <span className="text-primary-700 font-bold">Daily</span><br />
-                11:00 AM - 06:00 PM<br />
-                <span className="text-sm text-primary-600">Last order: 06:00 PM</span>
+                10:00 AM - 20:00 PM<br />
+                <span className="text-sm text-primary-600">Last order: 20:00 PM</span>
               </p>
             </div>
           </div>

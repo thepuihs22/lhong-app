@@ -6,6 +6,13 @@ import { supabase } from '@/lib/supabaseClient';
 import { Toaster, toast } from 'react-hot-toast';
 import Link from 'next/link';
 
+interface ExpenseContributor {
+  id?: string;
+  expense_id?: string;
+  contributor_name: string;
+  contribution_amount: number;
+}
+
 interface Expense {
   id: string;
   title: string;
@@ -13,6 +20,9 @@ interface Expense {
   amount: number;
   category: string;
   expense_date: string;
+  paid_by?: string; // Name of the person who paid
+  paid_amount?: number; // Amount paid by the payer
+  contributors?: ExpenseContributor[];
   created_at: string;
 }
 
@@ -40,7 +50,10 @@ export default function AdminExpensesPage() {
     amount: '',
     category: '',
     expense_date: new Date().toISOString().split('T')[0],
+    paid_by: '',
+    paid_amount: '',
   });
+  const [contributors, setContributors] = useState<ExpenseContributor[]>([]);
   const [newPurchase, setNewPurchase] = useState({
     supplier_name: '',
     item_name: '',
@@ -53,41 +66,133 @@ export default function AdminExpensesPage() {
   useEffect(() => {
     checkAuth();
     fetchData();
-  }, []);
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
+        router.push('/login');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router]);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      router.push('/login');
-      return;
-    }
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        router.push('/login');
+        return;
+      }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
+      if (!session) {
+        router.push('/login');
+        return;
+      }
 
-    if (!profile || profile.role !== 'admin') {
-      router.push('/login');
-      return;
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Profile error:', profileError);
+        router.push('/login');
+        return;
+      }
+
+      if (!profile || profile.role !== 'admin') {
+        router.push('/login');
+        return;
+      }
+    } catch (error: any) {
+      console.error('Auth check error:', error);
+      // If it's an auth error, redirect to login
+      if (error?.message?.includes('Refresh Token') || error?.message?.includes('Invalid')) {
+        router.push('/login');
+      }
     }
   };
 
   const fetchData = async () => {
     try {
+      // Check session first
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        if (sessionError?.message?.includes('Refresh Token') || sessionError?.message?.includes('Invalid')) {
+          router.push('/login');
+          return;
+        }
+        throw sessionError || new Error('No session');
+      }
+
       const [expensesResponse, purchasesResponse] = await Promise.all([
-        supabase.from('expenses').select('*').order('expense_date', { ascending: false }),
+        supabase
+          .from('expenses')
+          .select('*')
+          .order('expense_date', { ascending: false }),
         supabase.from('purchases').select('*').order('purchase_date', { ascending: false })
       ]);
 
-      if (expensesResponse.error) throw expensesResponse.error;
-      if (purchasesResponse.error) throw purchasesResponse.error;
+      // Check for auth errors in responses
+      if (expensesResponse.error) {
+        if (expensesResponse.error.message?.includes('Refresh Token') || expensesResponse.error.message?.includes('Invalid')) {
+          router.push('/login');
+          return;
+        }
+        throw expensesResponse.error;
+      }
+      if (purchasesResponse.error) {
+        if (purchasesResponse.error.message?.includes('Refresh Token') || purchasesResponse.error.message?.includes('Invalid')) {
+          router.push('/login');
+          return;
+        }
+        throw purchasesResponse.error;
+      }
 
-      setExpenses(expensesResponse.data || []);
+      // Fetch contributors for each expense
+      const expensesWithContributors = await Promise.all(
+        (expensesResponse.data || []).map(async (expense: any) => {
+          const { data: contributorsData, error: contributorsError } = await supabase
+            .from('expense_contributors')
+            .select('*')
+            .eq('expense_id', expense.id);
+          
+          if (contributorsError) {
+            if (contributorsError.message?.includes('Refresh Token') || contributorsError.message?.includes('Invalid')) {
+              router.push('/login');
+              return null;
+            }
+            console.error('Error fetching contributors:', contributorsError);
+          }
+          
+          return {
+            ...expense,
+            contributors: contributorsData || []
+          };
+        })
+      );
+
+      setExpenses(expensesWithContributors.filter((e): e is Expense => e !== null));
       setPurchases(purchasesResponse.data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching data:', error);
+      
+      // Check if it's an auth error
+      if (error?.message?.includes('Refresh Token') || 
+          error?.message?.includes('Invalid') ||
+          error?.status === 401) {
+        toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+        router.push('/login');
+        return;
+      }
+      
       toast.error('โหลดข้อมูลไม่สำเร็จ');
     } finally {
       setLoading(false);
@@ -96,12 +201,20 @@ export default function AdminExpensesPage() {
 
   const handleCreateExpense = async () => {
     if (!newExpense.title.trim() || !newExpense.amount || !newExpense.category) {
-      toast.error('Please fill in all required fields');
+      toast.error('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
+      return;
+    }
+
+    // Validate contributors if any
+    const totalContributions = contributors.reduce((sum: number, c: ExpenseContributor) => sum + (parseFloat(c.contribution_amount.toString()) || 0), 0);
+    if (contributors.length > 0 && totalContributions > parseFloat(newExpense.amount)) {
+      toast.error('ยอดเงินที่ผู้ร่วมจ่ายลงรวมกันเกินจำนวนเงินค่าใช้จ่าย');
       return;
     }
 
     try {
-      const { error } = await supabase
+      // Insert expense
+      const { data: expenseData, error: expenseError } = await supabase
         .from('expenses')
         .insert({
           title: newExpense.title,
@@ -109,9 +222,41 @@ export default function AdminExpensesPage() {
           amount: parseFloat(newExpense.amount),
           category: newExpense.category,
           expense_date: newExpense.expense_date,
-        });
+          paid_by: newExpense.paid_by || null,
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (expenseError) {
+        if (expenseError.message?.includes('Refresh Token') || expenseError.message?.includes('Invalid')) {
+          toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+          router.push('/login');
+          return;
+        }
+        throw expenseError;
+      }
+
+      // Insert contributors if any
+      if (contributors.length > 0 && expenseData) {
+        const contributorsToInsert = contributors.map((c: ExpenseContributor) => ({
+          expense_id: expenseData.id,
+          contributor_name: c.contributor_name,
+          contribution_amount: parseFloat(c.contribution_amount.toString()),
+        }));
+
+        const { error: contributorsError } = await supabase
+          .from('expense_contributors')
+          .insert(contributorsToInsert);
+
+        if (contributorsError) {
+          if (contributorsError.message?.includes('Refresh Token') || contributorsError.message?.includes('Invalid')) {
+            toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+            router.push('/login');
+            return;
+          }
+          throw contributorsError;
+        }
+      }
 
       toast.success('เพิ่มค่าใช้จ่ายสำเร็จ!');
       setShowExpenseForm(false);
@@ -121,11 +266,35 @@ export default function AdminExpensesPage() {
         amount: '',
         category: '',
         expense_date: new Date().toISOString().split('T')[0],
+        paid_by: '',
+        paid_amount: '',
       });
+      setContributors([]);
       fetchData();
     } catch (error: any) {
+      if (error?.message?.includes('Refresh Token') || 
+          error?.message?.includes('Invalid') ||
+          error?.status === 401) {
+        toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+        router.push('/login');
+        return;
+      }
       toast.error(error.message || 'เพิ่มค่าใช้จ่ายไม่สำเร็จ');
     }
+  };
+
+  const addContributor = () => {
+    setContributors([...contributors, { contributor_name: '', contribution_amount: 0 }]);
+  };
+
+  const removeContributor = (index: number) => {
+    setContributors(contributors.filter((_: ExpenseContributor, i: number) => i !== index));
+  };
+
+  const updateContributor = (index: number, field: keyof ExpenseContributor, value: string | number) => {
+    const updated = [...contributors];
+    updated[index] = { ...updated[index], [field]: value };
+    setContributors(updated);
   };
 
   const handleCreatePurchase = async () => {
@@ -151,7 +320,14 @@ export default function AdminExpensesPage() {
           purchase_date: newPurchase.purchase_date,
         });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes('Refresh Token') || error.message?.includes('Invalid')) {
+          toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+          router.push('/login');
+          return;
+        }
+        throw error;
+      }
 
       toast.success('เพิ่มการซื้อสำเร็จ!');
       setShowPurchaseForm(false);
@@ -164,6 +340,13 @@ export default function AdminExpensesPage() {
       });
       fetchData();
     } catch (error: any) {
+      if (error?.message?.includes('Refresh Token') || 
+          error?.message?.includes('Invalid') ||
+          error?.status === 401) {
+        toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+        router.push('/login');
+        return;
+      }
       toast.error(error.message || 'เพิ่มการซื้อไม่สำเร็จ');
     }
   };
@@ -177,11 +360,25 @@ export default function AdminExpensesPage() {
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes('Refresh Token') || error.message?.includes('Invalid')) {
+          toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+          router.push('/login');
+          return;
+        }
+        throw error;
+      }
 
       toast.success('ลบค่าใช้จ่ายสำเร็จ!');
       fetchData();
     } catch (error: any) {
+      if (error?.message?.includes('Refresh Token') || 
+          error?.message?.includes('Invalid') ||
+          error?.status === 401) {
+        toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+        router.push('/login');
+        return;
+      }
       toast.error(error.message || 'ลบค่าใช้จ่ายไม่สำเร็จ');
     }
   };
@@ -195,17 +392,31 @@ export default function AdminExpensesPage() {
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes('Refresh Token') || error.message?.includes('Invalid')) {
+          toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+          router.push('/login');
+          return;
+        }
+        throw error;
+      }
 
       toast.success('ลบการซื้อสำเร็จ!');
       fetchData();
     } catch (error: any) {
+      if (error?.message?.includes('Refresh Token') || 
+          error?.message?.includes('Invalid') ||
+          error?.status === 401) {
+        toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง');
+        router.push('/login');
+        return;
+      }
       toast.error(error.message || 'ลบการซื้อไม่สำเร็จ');
     }
   };
 
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const totalPurchases = purchases.reduce((sum, purchase) => sum + purchase.total_amount, 0);
+  const totalExpenses = expenses.reduce((sum: number, expense: Expense) => sum + expense.amount, 0);
+  const totalPurchases = purchases.reduce((sum: number, purchase: Purchase) => sum + purchase.total_amount, 0);
 
   if (loading) {
     return (
@@ -350,7 +561,13 @@ export default function AdminExpensesPage() {
                           จำนวนเงิน
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Date
+                          ผู้จ่าย
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          ผู้ร่วมจ่าย
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          วันที่
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
@@ -358,9 +575,9 @@ export default function AdminExpensesPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {expenses.map((expense) => (
+                      {expenses.map((expense: Expense) => (
                         <tr key={expense.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-4">
                             <div>
                               <div className="text-sm font-medium text-gray-900">{expense.title}</div>
                               {expense.description && (
@@ -376,8 +593,39 @@ export default function AdminExpensesPage() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             ${expense.amount.toFixed(2)}
                           </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            {expense.paid_by ? (
+                              <div>
+                                <div className="font-medium">{expense.paid_by}</div>
+                                {expense.paid_amount && (
+                                  <div className="text-xs text-gray-500">
+                                    ${expense.paid_amount.toFixed(2)}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            {expense.contributors && expense.contributors.length > 0 ? (
+                              <div className="space-y-1">
+                                {expense.contributors.map((contributor: ExpenseContributor, idx: number) => (
+                                  <div key={idx} className="text-xs">
+                                    <span className="font-medium">{contributor.contributor_name}</span>
+                                    {' '}: ${contributor.contribution_amount.toFixed(2)}
+                                  </div>
+                                ))}
+                                <div className="text-xs font-semibold text-gray-600 mt-1">
+                                  รวม: ${expense.contributors.reduce((sum: number, c: ExpenseContributor) => sum + c.contribution_amount, 0).toFixed(2)}
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(expense.expense_date).toLocaleDateString()}
+                            {new Date(expense.expense_date).toLocaleDateString('th-TH')}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button
@@ -436,7 +684,7 @@ export default function AdminExpensesPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {purchases.map((purchase) => (
+                      {purchases.map((purchase: Purchase) => (
                         <tr key={purchase.id}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {purchase.supplier_name}
@@ -541,14 +789,112 @@ export default function AdminExpensesPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Date</label>
-                  <input
-                    type="date"
-                    value={newExpense.expense_date}
-                    onChange={(e) => setNewExpense({...newExpense, expense_date: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">วันที่ *</label>
+                    <input
+                      type="date"
+                      value={newExpense.expense_date}
+                      onChange={(e) => setNewExpense({...newExpense, expense_date: e.target.value})}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">ผู้จ่าย</label>
+                    <input
+                      type="text"
+                      placeholder="ชื่อผู้จ่าย"
+                      value={newExpense.paid_by}
+                      onChange={(e) => setNewExpense({...newExpense, paid_by: e.target.value})}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">จำนวนเงินที่ผู้จ่ายจ่าย</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={newExpense.paid_amount}
+                      onChange={(e) => setNewExpense({...newExpense, paid_amount: e.target.value})}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary"
+                    />
+                  </div>
+                </div>
+
+                {/* Contributors Section - เงินลงทุน/ผู้ร่วมจ่ายต้นทุน */}
+                <div className="border-t pt-4 mt-4">
+                  <div className="mb-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        เงินลงทุน / ผู้ร่วมจ่ายต้นทุน
+                      </label>
+                      <button
+                        type="button"
+                        onClick={addContributor}
+                        className="text-sm bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium"
+                      >
+                        + เพิ่มผู้ร่วมจ่าย
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-3">
+                      ใส่รายชื่อผู้ที่ร่วมลงทุนและจำนวนเงินที่แต่ละคนลงทุน
+                    </p>
+                  </div>
+                  
+                  {contributors.length > 0 ? (
+                    <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                      {contributors.map((contributor: ExpenseContributor, index: number) => (
+                        <div key={index} className="grid grid-cols-2 gap-2 items-center bg-white p-3 rounded border border-gray-200">
+                          <div>
+                            <label className="block text-xs text-gray-600 mb-1">ชื่อผู้ร่วมจ่าย</label>
+                            <input
+                              type="text"
+                              placeholder="ชื่อผู้ร่วมจ่าย"
+                              value={contributor.contributor_name}
+                              onChange={(e) => updateContributor(index, 'contributor_name', e.target.value)}
+                              className="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-secondary focus:border-secondary"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-600 mb-1">จำนวนเงินที่ลงทุน</label>
+                            <div className="flex gap-2">
+                              <input
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                value={contributor.contribution_amount || ''}
+                                onChange={(e) => updateContributor(index, 'contribution_amount', parseFloat(e.target.value) || 0)}
+                                className="block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-secondary focus:border-secondary"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeContributor(index)}
+                                className="text-red-600 hover:text-red-800 px-3 py-2 text-lg font-bold"
+                                title="ลบผู้ร่วมจ่าย"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {contributors.length > 0 && (
+                        <div className="text-sm font-semibold text-gray-700 pt-2 border-t border-gray-300 mt-2">
+                          รวมผู้ร่วมจ่ายทั้งหมด: ${contributors.reduce((sum: number, c: ExpenseContributor) => sum + (parseFloat(c.contribution_amount.toString()) || 0), 0).toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                      <p className="text-sm text-gray-500 mb-2">ยังไม่มีผู้ร่วมจ่าย</p>
+                      <p className="text-xs text-gray-400">กดปุ่ม "+ เพิ่มผู้ร่วมจ่าย" เพื่อเพิ่มรายชื่อผู้ลงทุน</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">
